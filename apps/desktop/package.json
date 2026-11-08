@@ -1,0 +1,57 @@
+{
+  "name": "@petra/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Petra Real Estate OS",
+  "author": "Petra IT <info@petrait.site>",
+  "main": "main.cjs",
+  "scripts": {
+    "bundle": "node scripts/bundle.mjs",
+    "dev": "pnpm bundle && electron .",
+    "dist:linux": "pnpm bundle && electron-builder --linux AppImage",
+    "dist:win": "pnpm bundle && electron-builder --win nsis",
+    "typecheck": "echo n/a",
+    "test": "echo no desktop tests",
+    "build": "echo use dist:linux or dist:win"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.24.0"
+  },
+  "build": {
+    "appId": "site.petrait.realestate",
+    "productName": "Petra Real Estate",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "app/**",
+      "package.json"
+    ],
+    "asar": true,
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office",
+      "artifactName": "Petra-RealEstate-${version}.${ext}"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Petra-RealEstate-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "publish": null
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/petrait7s/petra_realestate"
+  }
+}

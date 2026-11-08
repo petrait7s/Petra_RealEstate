@@ -31,6 +31,8 @@ export type Dashboard = {
 };
 
 export const api = {
+  status: () => req<{ needsSetup: boolean }>("GET", "/v1/auth/status"),
+  setup: (b: unknown) => req<Session>("POST", "/v1/auth/setup", b),
   login: (email: string, password: string) => req<Session>("POST", "/v1/auth/login", { email, password }),
   users: () => req<User[]>("GET", "/v1/users"),
   createUser: (b: unknown) => req<User>("POST", "/v1/users", b),

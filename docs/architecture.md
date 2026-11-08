@@ -27,17 +27,15 @@ identity/tenancy, property graph, CRM, transactions, rentals, finance, documents
 6. Automation + WhatsApp
 7. Analytics + AI
 
+## Status (what is built)
+- Persistence: `node:sqlite` JSON-document `Collection` (DB_PATH). Postgres adapter not built; `db/migrations/0001_core.sql` is the target schema for the cloud path.
+- Auth: HS256 tokens, scrypt passwords, roles owner/manager/agent, first-run `/v1/auth/setup` (only while no users exist).
+- Modules: properties, listings, leads (state machine), visits, deals (installments), rentals (idempotent invoices), documents (10MB cap), automation + tasks (event bus), dashboard (overdue).
+- Desktop: Electron shell runs the bundled API in-process on 127.0.0.1:random, data in the OS user-data dir. Linux AppImage verified here; Windows `.exe` is built by `.github/workflows/desktop.yml` on a Windows runner (not verified here).
+- Not built: multi-user sync (desktop <-> cloud), Postgres adapter, e-sign/OCR, WhatsApp/SMS, payments gateway, auto-update, app icon.
+
 ## Desktop distribution (Windows .exe + Linux AppImage)
-Decision: ship same web UI + API as a desktop app.
+Electron + electron-builder (`nsis`, `AppImage`). API is Node, so it runs inside Electron main; Tauri rejected (needs Node sidecar).
 
-- Shell: Electron + electron-builder. Targets: `nsis` (Windows .exe), `AppImage` (Linux). API is Node/Fastify, so it runs in-process inside Electron main; no sidecar needed. (Tauri rejected: would need Node sidecar.)
-- Layout: `apps/desktop` (Electron main + preload), loads `apps/web` build, starts `apps/api` on a random localhost port.
-- Storage: repository interface per module with two adapters: Postgres (cloud/multi-user) and SQLite (desktop/offline). Do not use Postgres-only features (RLS, PostGIS) in domain logic; keep them inside the Postgres adapter. Desktop = single tenant, tenant check still enforced in repo layer.
-- Sync (later): desktop SQLite <-> cloud via outbox/event log.
-- Auth: desktop uses local login; cloud uses JWT. Same module interface.
-- Packaging CI: GitHub Actions matrix (windows-latest, ubuntu-latest) builds `.exe` and `.AppImage`, uploads as release assets. Cross-building the .exe from Linux is unreliable; build on the Windows runner.
-- Auto-update: electron-updater.
-
-### Consequences for current code
-- In-memory stores in `apps/api/src/modules/*` become `Repository` interfaces next.
-- Keep API free of Postgres-specific calls outside the adapter.
+- `pnpm dist:linux` / `pnpm dist:win` from repo root. `apps/desktop/scripts/bundle.mjs` esbuilds the API into one file and copies the web build.
+- Sync (later, for several project managers): cloud API + Postgres is source of truth; desktop keeps SQLite + outbox, pushes/pulls by cursor, field-level last-write-wins with `rev`, money/ledger conflicts rejected.

@@ -6,7 +6,17 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "dev:api": "pnpm --filter @petra/api dev"
+    "dev:api": "pnpm --filter @petra/api dev",
+    "dist:linux": "pnpm --filter @petra/web build && pnpm --filter @petra/desktop dist:linux",
+    "dist:win": "pnpm --filter @petra/web build && pnpm --filter @petra/desktop dist:win"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild"
+    ]
+  }
 }

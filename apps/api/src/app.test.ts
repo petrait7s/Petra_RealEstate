@@ -141,3 +141,18 @@ test("team: owner creates user, duplicate email rejected, password never leaked"
   assert.equal((await c("POST", "/v1/users", { email: "new@t1.test", name: "N", role: "agent", password: "abcdef" })).code, 409);
   assert.ok(!JSON.stringify((await c("GET", "/v1/users")).body).includes("passHash"));
 });
+
+test("first-run setup: only when no users, then locked; short password rejected", async () => {
+  resetDb();
+  const app = buildApp();
+  assert.equal((await app.inject({ url: "/v1/auth/status" })).json().needsSetup, true);
+  const bad = await app.inject({ method: "POST", url: "/v1/auth/setup", payload: { name: "A", email: "a@x.test", password: "short" } });
+  assert.equal(bad.statusCode, 400);
+  const ok = await app.inject({ method: "POST", url: "/v1/auth/setup", payload: { name: "A", email: "a@x.test", password: "longenough" } });
+  assert.equal(ok.statusCode, 201);
+  assert.equal(ok.json().user.role, "owner");
+  assert.equal((await app.inject({ url: "/v1/auth/status" })).json().needsSetup, false);
+  assert.equal((await app.inject({ method: "POST", url: "/v1/auth/setup", payload: { name: "B", email: "b@x.test", password: "longenough" } })).statusCode, 409);
+  const me = await app.inject({ url: "/v1/auth/me", headers: { authorization: `Bearer ${ok.json().token}` } });
+  assert.equal(me.json().role, "owner");
+});

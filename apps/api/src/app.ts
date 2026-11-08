@@ -23,7 +23,7 @@ export function buildApp() {
   app.decorateRequest("user", undefined as never);
   app.addHook("onRequest", async (req, reply) => {
     const url = req.url.split("?")[0];
-    if (!url.startsWith("/v1/") || url === "/v1/auth/login") return;
+    if (!url.startsWith("/v1/") || ["/v1/auth/login", "/v1/auth/status", "/v1/auth/setup"].includes(url)) return;
     const h = req.headers.authorization;
     const claims = h?.startsWith("Bearer ") ? verifyToken(h.slice(7)) : undefined;
     if (!claims) return reply.code(401).send({ error: "unauthorized" });

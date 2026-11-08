@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, setSession, type Session } from "../api";
 import { Btn, Err, Input } from "../ui";
 
 export default function Login({ onLogin }: { onLogin: (s: Session) => void }) {
   const [err, setErr] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const [setup, setSetup] = useState(false);
+  useEffect(() => { api.status().then((s) => setSetup(s.needsSetup)).catch(() => {}); }, []);
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     setBusy(true);
     try {
-      const s = await api.login(String(f.get("email")), String(f.get("password")));
+      const s = setup
+        ? await api.setup({ name: String(f.get("name")), email: String(f.get("email")), password: String(f.get("password")) })
+        : await api.login(String(f.get("email")), String(f.get("password")));
       setSession(s); onLogin(s);
     } catch (x) { setErr((x as Error).message); setBusy(false); }
   };
@@ -22,9 +26,10 @@ export default function Login({ onLogin }: { onLogin: (s: Session) => void }) {
           <div className="leading-tight"><div className="font-semibold tracking-wide">PETRA</div><div className="text-[11px] text-accent-text">Real Estate OS</div></div>
         </div>
         <Err msg={err} />
+        {setup && <><p className="text-sm text-ink-2">Welcome. Create the owner account to get started.</p><Input name="name" label="Your name" required /></>}
         <Input name="email" type="email" label="Email" autoComplete="username" required />
-        <Input name="password" type="password" label="Password" autoComplete="current-password" required />
-        <Btn type="submit" disabled={busy} className="w-full">{busy ? "Signing in…" : "Sign in"}</Btn>
+        <Input name="password" type="password" minLength={setup ? 8 : undefined} label={setup ? "Password (min 8)" : "Password"} autoComplete={setup ? "new-password" : "current-password"} required />
+        <Btn type="submit" disabled={busy} className="w-full">{busy ? "Please wait…" : setup ? "Create account" : "Sign in"}</Btn>
       </form>
     </div>
   );

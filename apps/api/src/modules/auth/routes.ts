@@ -18,6 +18,14 @@ export const authModule: FastifyPluginAsync = async (app) => {
     if (!u || !checkPassword(password, u.passHash)) return reply.code(401).send({ error: "invalid email or password" });
     return { token: signToken({ sub: u.id, tenantId: u.tenantId, role: u.role, name: u.name }), user: pub(u) };
   });
+  // First-run: allowed only while no user exists (fresh desktop install / new deployment).
+  app.get("/status", async () => ({ needsSetup: db.users.all().length === 0 }));
+  app.post("/setup", async (req, reply) => {
+    if (db.users.all().length > 0) return reply.code(409).send({ error: "already set up" });
+    const b = z.object({ name: z.string().min(1), email: z.string().email(), password: z.string().min(8) }).parse(req.body);
+    const u = createUser(randomUUID(), b.email, b.name, "owner", b.password);
+    return reply.code(201).send({ token: signToken({ sub: u.id, tenantId: u.tenantId, role: u.role, name: u.name }), user: pub(u) });
+  });
   app.get("/me", async (req) => ({ id: req.user.sub, name: req.user.name, role: req.user.role, tenantId: req.user.tenantId }));
 };
 
