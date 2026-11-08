@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  /* Petra brand (from petrait.site): navy #0c1d35, teal #038d91 */
+  --color-page: #f4f6f9;
+  --color-surface: #e6e9ef;
+  --color-ink: #0c1d35;
+  --color-ink-2: #34455f;
+  --color-ink-3: #52627a;
+  --color-line: #d4dae3;
+  --color-accent: #038d91;
+  --color-accent-text: #026f73;
+  --color-accent-soft: #d8eeee;
+  --color-glow: #3fd0d3;
+  --color-stage: #0c1d35;
+  --color-stage-2: #14284a;
+  --color-ok: #1f9d6b;
+  --color-warn: #d99a1e;
+  --color-bad: #d6504b;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html, body, #root { height: 100%; }
+body { background: var(--color-page); color: var(--color-ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid var(--color-accent-text); outline-offset: 2px; }

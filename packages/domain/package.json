@@ -4,7 +4,7 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "scripts": { "build": "tsc -p .", "typecheck": "tsc -p . --noEmit", "test": "node --test dist/" },
+  "scripts": { "build": "tsc -p .", "typecheck": "tsc -p . --noEmit", "test": "node --test dist/domain.test.js" },
   "dependencies": { "zod": "^3.23.8" },
   "devDependencies": { "typescript": "^5.6.3", "@types/node": "^22.0.0" }
 }

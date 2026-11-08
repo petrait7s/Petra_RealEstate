@@ -12,3 +12,10 @@ test("lead stage machine", () => {
   assert.equal(canTransition("new", "contacted"), true);
   assert.equal(canTransition("new", "won"), false);
 });
+
+import { splitInstallments } from "./index.js";
+test("installments sum to total", () => {
+  const parts = splitInstallments(money(1000001), 3, new Date("2026-01-05"), () => "00000000-0000-0000-0000-000000000000");
+  assert.equal(parts.reduce((s, p) => s + p.amount.amount, 0), 1000001);
+  assert.equal(parts.length, 3);
+});
