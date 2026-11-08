@@ -11,16 +11,17 @@ import Rentals from "./pages/Rentals";
 import Documents from "./pages/Documents";
 import Tasks from "./pages/Tasks";
 import Team from "./pages/Team";
+import Settings from "./pages/Settings";
 
 const nav = [
   ["/", "Overview"], ["/properties", "Properties"], ["/leads", "Pipeline"], ["/visits", "Visits"],
-  ["/deals", "Deals"], ["/rentals", "Rentals"], ["/documents", "Documents"], ["/tasks", "Tasks"], ["/team", "Team"],
+  ["/deals", "Deals"], ["/rentals", "Rentals"], ["/documents", "Documents"], ["/tasks", "Tasks"], ["/team", "Team"], ["/settings", "Settings"],
 ] as const;
 
 export default function App() {
   const [session, setS] = useState<Session | undefined>(getSession());
   if (!session) return <Login onLogin={setS} />;
-  const items = nav.filter(([to]) => to !== "/team" || session.user.role === "owner");
+  const items = nav.filter(([to]) => (to !== "/team" || session.user.role === "owner") && (to !== "/settings" || session.user.role !== "agent"));
   const logout = () => { setSession(undefined); setS(undefined); };
   const link = (mobile: boolean) => ({ isActive }: { isActive: boolean }) =>
     mobile
@@ -57,6 +58,7 @@ export default function App() {
             <Route path="/rentals" element={<Rentals />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/tasks" element={<Tasks />} />
+            <Route path="/settings" element={session.user.role === "agent" ? <Navigate to="/" replace /> : <Settings />} />
             <Route path="/team" element={session.user.role === "owner" ? <Team /> : <Navigate to="/" replace />} />
           </Routes>
         </main>

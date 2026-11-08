@@ -10,6 +10,7 @@ import { dashboardModule } from "./modules/dashboard/routes.js";
 import { authModule, usersModule } from "./modules/auth/routes.js";
 import { documentsModule } from "./modules/documents/routes.js";
 import { automationModule, tasksModule } from "./modules/automation/routes.js";
+import { demoModule } from "./modules/demo/routes.js";
 import { syncModule } from "./modules/sync/routes.js";
 import { verifyToken } from "./auth.js";
 
@@ -33,6 +34,8 @@ export function buildApp() {
     // Role matrix: owner = all; manager = all except team; agent = no money/rental writes, no automation/team.
     if (url.startsWith("/v1/users") && claims.role !== "owner") return reply.code(403).send({ error: "forbidden" });
     if (url.startsWith("/v1/sync") && claims.role === "agent") return reply.code(403).send({ error: "forbidden" });
+    if (url.startsWith("/v1/demo") && claims.role === "agent") return reply.code(403).send({ error: "forbidden" });
+    if (claims.role === "agent" && req.method === "DELETE") return reply.code(403).send({ error: "forbidden" });
     if (claims.role === "agent" && write && /^\/v1\/(deals|leases|automations)/.test(url)) return reply.code(403).send({ error: "forbidden" });
   });
 
@@ -48,6 +51,7 @@ export function buildApp() {
   app.register(documentsModule, { prefix: "/v1/documents" });
   app.register(automationModule, { prefix: "/v1/automations" });
   app.register(tasksModule, { prefix: "/v1/tasks" });
+  app.register(demoModule, { prefix: "/v1/demo" });
   app.register(syncModule, { prefix: "/v1/sync" });
   app.register(dashboardModule, { prefix: "/v1/dashboard" });
 

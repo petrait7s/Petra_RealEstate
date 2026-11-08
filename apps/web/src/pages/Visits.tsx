@@ -40,6 +40,7 @@ export default function Visits() {
               <div className="flex items-center gap-2">
                 <Badge tone={v.status === "done" ? "ok" : v.status === "cancelled" ? "bad" : "info"}>{v.status}</Badge>
                 {v.status === "scheduled" && (<><Btn kind="ghost" onClick={() => set(v.id, "done")}>Done</Btn><Btn kind="ghost" onClick={() => set(v.id, "cancelled")}>Cancel</Btn></>)}
+                <button aria-label="Delete visit" title="Delete visit" className="text-bad text-lg leading-none px-1" onClick={async () => { if (confirm("Delete this visit?")) { await api.deleteVisit(v.id); visits.reload(); } }}>×</button>
               </div>
             </div>
           ))}

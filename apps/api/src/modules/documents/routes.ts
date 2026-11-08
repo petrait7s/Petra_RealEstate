@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
 import { createHash, randomUUID } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import { Doc } from "@petra/domain";
@@ -12,6 +12,7 @@ const dir = () => {
   mkdirSync(d, { recursive: true });
   return d;
 };
+export const removeDocFile = (id: string) => rmSync(join(dir(), id), { force: true });
 const Upload = z.object({
   name: z.string().min(1).max(200),
   mime: z.string().default("application/octet-stream"),

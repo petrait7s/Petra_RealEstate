@@ -15,6 +15,9 @@ pnpm test
 ## Login
 Dev (seeded): `owner@petra.test` / `manager@petra.test` / `agent@petra.test`, password `petra123`. Never ship with seed on: set `SEED=0` (desktop does) and use first-run setup.
 
+## Demo data
+Settings -> Load demo data (10 properties, 14 leads, deals with overdue installments, rentals, tasks). Clear all data wipes business records (typed `CLEAR` to confirm); users and automation rules are kept. Clear is a soft delete, so it is sync-safe.
+
 ## Features
 Overview (with overdue alerts), properties + listings, lead pipeline (state machine), site visits, deals with installments, rentals with monthly invoices, documents, tasks + automation rules, team and roles.
 
