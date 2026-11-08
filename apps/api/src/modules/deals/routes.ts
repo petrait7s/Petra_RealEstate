@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Deal, Money, splitInstallments } from "@petra/domain";
 import { db } from "../../db.js";
 import { tid } from "../../store.js";
+import { emit } from "../../bus.js";
 
 const CreateDeal = z.object({
   leadId: z.string().uuid(),
@@ -30,7 +31,9 @@ export const dealsModule: FastifyPluginAsync = async (app) => {
       installments: splitInstallments(b.price, b.installments, b.firstDue ? new Date(b.firstDue) : new Date(), randomUUID),
       createdAt: new Date().toISOString(),
     };
-    return reply.code(201).send(db.deals.add(deal));
+    db.deals.add(deal);
+    emit("deal.created", t, { name: db.leads.get(t, b.leadId)?.name });
+    return reply.code(201).send(deal);
   });
   app.get("/", async (req) => db.deals.list(tid(req)));
   app.post<{ Params: { id: string; iid: string } }>("/:id/installments/:iid/pay", async (req, reply) => {
@@ -40,12 +43,14 @@ export const dealsModule: FastifyPluginAsync = async (app) => {
     if (inst.paidAt) return reply.code(409).send({ error: "already paid" });
     inst.paidAt = new Date().toISOString();
     refresh(d);
+    db.deals.save(d);
+    emit("installment.paid", d.tenantId, { name: db.leads.get(d.tenantId, d.leadId)?.name, stage: d.status });
     return d;
   });
   app.post<{ Params: { id: string } }>("/:id/cancel", async (req, reply) => {
     const d = db.deals.get(tid(req), req.params.id);
     if (!d) return reply.code(404).send({ error: "not found" });
     d.status = "cancelled";
-    return d;
+    return db.deals.save(d);
   });
 };

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Lead, LeadStage, Visit, canTransition } from "@petra/domain";
 import { db } from "../../db.js";
 import { tid } from "../../store.js";
+import { emit } from "../../bus.js";
 
 const CreateLead = Lead.omit({ id: true, tenantId: true, stage: true });
 const CreateVisit = Visit.omit({ id: true, tenantId: true });
@@ -11,7 +12,9 @@ const CreateVisit = Visit.omit({ id: true, tenantId: true });
 export const leadsModule: FastifyPluginAsync = async (app) => {
   app.post("/", async (req, reply) => {
     const l: Lead = { ...CreateLead.parse(req.body), id: randomUUID(), tenantId: tid(req), stage: "new" };
-    return reply.code(201).send(db.leads.add(l));
+    db.leads.add(l);
+    emit("lead.created", l.tenantId, { name: l.name });
+    return reply.code(201).send(l);
   });
   app.get("/", async (req) => db.leads.list(tid(req)));
   app.post<{ Params: { id: string } }>("/:id/stage", async (req, reply) => {
@@ -20,6 +23,8 @@ export const leadsModule: FastifyPluginAsync = async (app) => {
     const { stage } = z.object({ stage: LeadStage }).parse(req.body);
     if (!canTransition(lead.stage, stage)) return reply.code(409).send({ error: `bad transition ${lead.stage}->${stage}` });
     lead.stage = stage;
+    db.leads.save(lead);
+    emit("lead.stage", lead.tenantId, { name: lead.name, stage });
     return lead;
   });
 };
@@ -36,6 +41,8 @@ export const visitsModule: FastifyPluginAsync = async (app) => {
     const v = db.visits.get(tid(req), req.params.id);
     if (!v) return reply.code(404).send({ error: "not found" });
     v.status = z.object({ status: Visit.shape.status }).parse(req.body).status;
+    db.visits.save(v);
+    if (v.status === "done") emit("visit.done", v.tenantId, { name: db.leads.get(v.tenantId, v.leadId)?.name });
     return v;
   });
 };

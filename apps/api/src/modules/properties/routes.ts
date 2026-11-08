@@ -28,6 +28,6 @@ export const listingsModule: FastifyPluginAsync = async (app) => {
     const l = db.listings.get(tid(req), req.params.id);
     if (!l) return reply.code(404).send({ error: "not found" });
     l.status = z.object({ status: Listing.shape.status }).parse(req.body).status;
-    return l;
+    return db.listings.save(l);
   });
 };

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "../api";
+import { api, getSession } from "../api";
 import { Badge, Btn, Card, Drawer, Empty, Err, Input, PageHead, Select, taka, toMinor, useLoad, formVals } from "../ui";
 
 const month = () => new Date().toISOString().slice(0, 7);
@@ -25,7 +25,7 @@ export default function Rentals() {
 
   return (
     <>
-      <PageHead title="Rentals" sub="Leases and monthly rent collection" action={<Btn onClick={() => setOpen(true)}>New lease</Btn>} />
+      <PageHead title="Rentals" sub="Leases and monthly rent collection" action={getSession()?.user.role === "agent" ? undefined : <Btn onClick={() => setOpen(true)}>New lease</Btn>} />
       <Err msg={err} />
       {!leases.data?.length ? <Empty>No leases yet.</Empty> : (
         <div className="space-y-3">

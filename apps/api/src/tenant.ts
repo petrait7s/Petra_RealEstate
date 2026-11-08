@@ -1,8 +1,7 @@
-import type { FastifyRequest } from "fastify";
+import type { Role } from "@petra/domain";
 
-/** Tenant from header for now. Replace with JWT claim once auth module lands. */
-export function tenantId(req: FastifyRequest): string {
-  const t = req.headers["x-tenant-id"];
-  if (typeof t !== "string" || !t) throw Object.assign(new Error("x-tenant-id required"), { statusCode: 400 });
-  return t;
+export type Claims = { sub: string; tenantId: string; role: Role; name: string; exp: number };
+
+declare module "fastify" {
+  interface FastifyRequest { user: Claims }
 }

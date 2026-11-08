@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "../api";
+import { api, getSession } from "../api";
 import { Badge, Btn, Card, Drawer, Empty, Err, Input, PageHead, Select, taka, toMinor, useLoad, formVals } from "../ui";
 
 export default function Deals() {
@@ -27,7 +27,7 @@ export default function Deals() {
 
   return (
     <>
-      <PageHead title="Deals" sub="Bookings and payment schedules" action={<Btn onClick={() => setOpen(true)}>New deal</Btn>} />
+      <PageHead title="Deals" sub="Bookings and payment schedules" action={getSession()?.user.role === "agent" ? undefined : <Btn onClick={() => setOpen(true)}>New deal</Btn>} />
       <Err msg={err} />
       {!deals.data?.length ? <Empty>No deals yet.</Empty> : (
         <div className="space-y-3">

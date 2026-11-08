@@ -19,3 +19,9 @@ test("installments sum to total", () => {
   assert.equal(parts.reduce((s, p) => s + p.amount.amount, 0), 1000001);
   assert.equal(parts.length, 3);
 });
+
+import { renderTemplate } from "./index.js";
+test("template render", () => {
+  assert.equal(renderTemplate("Call {name} ({stage})", { name: "Rahim", stage: "new" }), "Call Rahim (new)");
+  assert.equal(renderTemplate("Hi {missing}", {}), "Hi ");
+});

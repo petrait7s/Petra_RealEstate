@@ -9,7 +9,7 @@ export default function Dashboard() {
   const c = data.counts;
   const stats = [
     ["Properties", c.properties], ["Active listings", c.activeListings], ["Leads", c.leads],
-    ["Visits scheduled", c.upcomingVisits], ["Deals", c.deals], ["Leases", c.leases],
+    ["Visits scheduled", c.upcomingVisits], ["Deals", c.deals], ["Open tasks", c.openTasks],
   ];
   const max = Math.max(1, ...Object.values(data.pipeline));
   const money = [
@@ -24,6 +24,15 @@ export default function Dashboard() {
           <Card key={k} className="p-5"><div className="text-3xl font-semibold">{v}</div><div className="text-xs text-ink-3 mt-1">{k}</div></Card>
         ))}
       </div>
+      {(data.overdue.installments > 0 || data.overdue.invoices > 0) && (
+        <Card className="p-5 mb-3 border-bad/40 bg-bad/5">
+          <h2 className="text-sm font-semibold text-bad mb-1">Overdue</h2>
+          <p className="text-sm text-ink-2">
+            {data.overdue.installments > 0 && <>{data.overdue.installments} sale installment(s), {taka(data.overdue.installmentAmount)}. </>}
+            {data.overdue.invoices > 0 && <>{data.overdue.invoices} rent invoice(s), {taka(data.overdue.invoiceAmount)}.</>}
+          </p>
+        </Card>
+      )}
       <div className="grid md:grid-cols-2 gap-3">
         <Card className="p-5">
           <h2 className="text-sm font-semibold mb-4">Pipeline</h2>
