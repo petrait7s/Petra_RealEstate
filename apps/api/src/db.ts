@@ -1,5 +1,5 @@
 import type { Property, Listing, Lead, Visit, Deal, Lease, RentInvoice, User, Doc, Task, Automation } from "@petra/domain";
-import { Collection } from "./store.js";
+import { Collection, resetChanges } from "./store.js";
 
 export type UserRow = User & { passHash: string };
 
@@ -16,4 +16,4 @@ export const db = {
   tasks: new Collection<Task>("tasks"),
   automations: new Collection<Automation>("automations"),
 };
-export const resetDb = () => Object.values(db).forEach((c) => c.clear());
+export const resetDb = () => { Object.values(db).forEach((c) => c.clear()); resetChanges(); };

@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from "fastify";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
@@ -29,7 +29,7 @@ export const documentsModule: FastifyPluginAsync = async (app) => {
     if (buf.length > MAX_DOC_BYTES) return reply.code(413).send({ error: "file too large (max 10MB)" });
     const id = randomUUID();
     writeFileSync(join(dir(), id), buf); // id is server-generated: no path traversal
-    const doc = db.docs.add({ id, tenantId: t, name: b.name, mime: b.mime, size: buf.length, entityType: b.entityType, entityId: b.entityId, uploadedBy: req.user.sub, createdAt: new Date().toISOString() });
+    const doc = db.docs.add({ id, tenantId: t, name: b.name, mime: b.mime, size: buf.length, sha256: createHash("sha256").update(buf).digest("hex"), entityType: b.entityType, entityId: b.entityId, uploadedBy: req.user.sub, createdAt: new Date().toISOString() });
     return reply.code(201).send(doc);
   });
   app.get<{ Querystring: { entityType?: string; entityId?: string } }>("/", async (req) =>

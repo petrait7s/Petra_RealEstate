@@ -27,5 +27,8 @@ pnpm dist:win     # run on Windows (or the "Desktop builds" GitHub workflow)
 ## Env
 `DB_PATH` (SQLite file; default in-memory), `DATA_DIR` (uploaded files), `JWT_SECRET` (optional; else generated and stored in the DB), `WEB_DIR` (serve built web from the API), `SEED=0`.
 
+## Sync
+Not built. The data layer is sync-ready (revisions, tombstones, change log, device id, `GET /v1/sync/changes`). See `docs/sync-design.md`.
+
 ## Not done yet
 Multi-user sync, Postgres adapter, WhatsApp/SMS, payment gateway, e-sign, auto-update, app icon.

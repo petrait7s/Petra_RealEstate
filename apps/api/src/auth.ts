@@ -1,16 +1,13 @@
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import { sql } from "./store.js";
+import { meta, setMeta } from "./store.js";
 import type { Claims } from "./tenant.js";
 
 const b64 = (b: Buffer | string) => Buffer.from(b).toString("base64url");
 
 function secret(): string {
   if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
-  sql().exec("CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT NOT NULL)");
-  const row = sql().prepare("SELECT v FROM meta WHERE k = 'jwt_secret'").get() as { v: string } | undefined;
-  if (row) return row.v;
-  const v = randomBytes(32).toString("hex");
-  sql().prepare("INSERT INTO meta (k, v) VALUES ('jwt_secret', ?)").run(v);
+  let v = meta("jwt_secret");
+  if (!v) { v = randomBytes(32).toString("hex"); setMeta("jwt_secret", v); }
   return v;
 }
 

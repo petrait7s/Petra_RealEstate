@@ -18,6 +18,8 @@ export const Doc = z.object({
   name: z.string().min(1),
   mime: z.string(),
   size: z.number().int().nonnegative(),
+  /** content hash: lets a sync peer fetch file blobs only when missing */
+  sha256: z.string().length(64).optional(),
   entityType: z.enum(["property", "lead", "deal", "lease"]).optional(),
   entityId: z.string().uuid().optional(),
   uploadedBy: z.string().uuid(),
